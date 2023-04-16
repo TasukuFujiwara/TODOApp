@@ -9,6 +9,8 @@ import SwiftUI
 
 struct MainView: View {
     @EnvironmentObject var viewModel: ViewModel
+    @State private var createView: Bool = false
+    
     var body: some View {
         NavigationStack {
             List {
@@ -20,15 +22,17 @@ struct MainView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink {
-                        CreateView()
-                            .environmentObject(ViewModel())
-                    } label: {
+                    Button(action: {
+                        createView.toggle()
+                    }, label: {
                         Image(systemName: "plus")
-                    }
-
+                    })
                 }
             }
+        }
+        .sheet(isPresented: $createView) {
+            CreateView()
+                .environmentObject(ViewModel())
         }
     }
 }
