@@ -7,14 +7,24 @@
 
 import SwiftUI
 
+
+enum viewMode {
+    case main, edit
+}
+
 struct MainView: View {
     @EnvironmentObject var viewModel: ViewModel
     @State private var createView: Bool = false
-    @State private var hideButton: Bool = false
+    @State private var hideCreateButton: Bool = false
+    @State private var selectedItemID: Set<UUID> = []
+    
+    
+    
+    @State private var nowViewMode: viewMode = .main
     
     var body: some View {
         NavigationStack {
-            List {
+            List(selection: $selectedItemID) {
                 ForEach(viewModel.todoItems.freeze()) { item in
                     //@State var todoItem: TODOItem = item
                     NavigationLink {
@@ -24,25 +34,37 @@ struct MainView: View {
                         Text(item.title)
                     }
                 }
-                .onDelete { indexSet in
-                    if let index = indexSet.first {
-                        viewModel.deleteItem(viewModel.todoItems[index].id)
-                    }
-                }
             }
             .navigationTitle("TODOリスト")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
-                        createView.toggle()
+                        switch nowViewMode {
+                        case .main:
+                            createView.toggle()
+                        case .edit:
+                            for id in selectedItemID {
+                                viewModel.deleteItem(id)
+                            }
+                        }
+                        //createView.toggle()
                     }, label: {
-                        Image(systemName: "plus")
+                        switch nowViewMode {
+                        case .main:
+                            Image(systemName: "plus")
+                        case .edit:
+                            Text("削除")
+                        }
+                        //Image(systemName: "plus")
                     })
-                    .disabled(hideButton)
+                    .disabled(hideCreateButton)
                 }
                 ToolbarItem(placement: .navigationBarLeading) {
-                    MyEditButton(hideButton: $hideButton)
+                    //EditButton()
+                    MyEditButton(nowViewMode: $nowViewMode)
+                    //nowViewMode = .edit
+                    //.disabled(viewModel.todoItems.isEmpty)
                 }
             }
         }
@@ -55,22 +77,21 @@ struct MainView: View {
 
 struct MyEditButton: View {
     @Environment(\.editMode) var editMode
-    @Binding var hideButton: Bool
+    //@Binding var hideButton: Bool
+    @Binding var nowViewMode: viewMode
     
     var body: some View {
         Button(action: {
-            withAnimation() {
-                if editMode?.wrappedValue.isEditing == true {
-                    editMode?.wrappedValue = .inactive
-                    hideButton.toggle()
-                } else {
-                    editMode?.wrappedValue = .active
-                    hideButton.toggle()
-                }
+            if editMode?.wrappedValue.isEditing == true {
+                editMode?.wrappedValue = .inactive
+                nowViewMode = .main
+            } else {
+                editMode?.wrappedValue = .active
+                nowViewMode = .edit
             }
         }, label: {
             if let isEditing = editMode?.wrappedValue.isEditing {
-                isEditing ? Text("終了") : Text("編集")
+                isEditing ? Text("キャンセル") : Text("選択")
             }
         })
     }

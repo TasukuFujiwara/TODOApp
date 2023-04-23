@@ -38,6 +38,7 @@ struct EditView_Previews: PreviewProvider {
     static var previews: some View {
         let id = UUID()
         let title = ""
+        let isEditing = true
         EditView(id: id, title: title)
             .environmentObject(ViewModel())
     }
