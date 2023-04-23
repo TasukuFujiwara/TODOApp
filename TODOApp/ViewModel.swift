@@ -20,7 +20,7 @@ class ViewModel: ObservableObject {
             switch changes {
             case .initial:
                 self?.itemList = self?.todoItems.map{ $0 } ?? []
-            case .update(let record, deletions: let deletion, insertions: let insertion, modifications: _):
+            case .update(let record, deletions: let deletion, insertions: let insertion, modifications: let modification):
                 if deletion != [] {
                     for index in deletion {
                         self?.itemList.remove(at: index)
@@ -29,6 +29,11 @@ class ViewModel: ObservableObject {
                 if insertion != [] {
                     for index in insertion {
                         self?.itemList.append(record[index])
+                    }
+                }
+                if modification != [] {
+                    for index in modification {
+                        self?.itemList[index] = record[index]
                     }
                 }
             case .error(_):
@@ -56,5 +61,10 @@ class ViewModel: ObservableObject {
     func deleteItem(_ id: TODOItem.ID) {
         guard let item = model.itemFromID(id) else { fatalError("id: \(id) not exists") }
         model.deleteItem(item)
+    }
+    
+    func editItem(id: TODOItem.ID, title: String) {
+        guard let _ = model.itemFromID(id) else { fatalError("id: \(id) not exists") }
+        model.editItem(id: id, title: title)
     }
 }

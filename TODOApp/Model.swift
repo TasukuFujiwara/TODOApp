@@ -41,6 +41,14 @@ class DBModel: ObservableObject {
             realm.delete(item)
         }
     }
+    
+    func editItem(id: UUID, title: String) {
+        guard let item = itemFromID(id) else { fatalError("id: \(id) not exists") }
+        self.objectWillChange.send()
+        try! realm.write {
+            item.title = title
+        }
+    }
 }
 
 // TODOItem: TODOを管理するクラス

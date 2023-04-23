@@ -10,12 +10,19 @@ import SwiftUI
 struct MainView: View {
     @EnvironmentObject var viewModel: ViewModel
     @State private var createView: Bool = false
+    @State private var hideButton: Bool = false
     
     var body: some View {
         NavigationStack {
             List {
                 ForEach(viewModel.todoItems.freeze()) { item in
-                    Text("\(item.title)")
+                    //@State var todoItem: TODOItem = item
+                    NavigationLink {
+                        EditView(id: item.id, title: item.title)
+                            .environmentObject(ViewModel())
+                    } label: {
+                        Text(item.title)
+                    }
                 }
                 .onDelete { indexSet in
                     if let index = indexSet.first {
@@ -32,9 +39,10 @@ struct MainView: View {
                     }, label: {
                         Image(systemName: "plus")
                     })
+                    .disabled(hideButton)
                 }
                 ToolbarItem(placement: .navigationBarLeading) {
-                    MyEditButton()
+                    MyEditButton(hideButton: $hideButton)
                 }
             }
         }
@@ -47,14 +55,17 @@ struct MainView: View {
 
 struct MyEditButton: View {
     @Environment(\.editMode) var editMode
+    @Binding var hideButton: Bool
     
     var body: some View {
         Button(action: {
             withAnimation() {
                 if editMode?.wrappedValue.isEditing == true {
                     editMode?.wrappedValue = .inactive
+                    hideButton.toggle()
                 } else {
                     editMode?.wrappedValue = .active
+                    hideButton.toggle()
                 }
             }
         }, label: {

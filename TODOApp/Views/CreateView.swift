@@ -15,11 +15,8 @@ struct CreateView: View {
     
     var body: some View {
         NavigationStack {
-            HStack {
-                List {
-                    TextField("タイトル", text: $title)
-                }
-                Spacer()
+            List {
+                TextField("タイトル", text: $title)
             }
             .navigationTitle("新規作成")
             .toolbar {
