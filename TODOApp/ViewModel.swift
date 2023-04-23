@@ -12,6 +12,35 @@ import RealmSwift
 // ViewModel: ビューとDBのインタフェースとなるモデル
 class ViewModel: ObservableObject {
     @Published var model: DBModel = DBModel()
+    private var token: NotificationToken?
+    @Published var itemList: [TODOItem] = []
+    
+    init() {
+        token = model.items.observe { [weak self] (changes: RealmCollectionChange) in
+            switch changes {
+            case .initial:
+                self?.itemList = self?.todoItems.map{ $0 } ?? []
+            case .update(let record, deletions: let deletion, insertions: let insertion, modifications: _):
+                if deletion != [] {
+                    for index in deletion {
+                        self?.itemList.remove(at: index)
+                    }
+                }
+                if insertion != [] {
+                    for index in insertion {
+                        self?.itemList.append(record[index])
+                    }
+                }
+            case .error(_):
+                fatalError("error")
+            }
+            
+        }
+    }
+    
+    deinit {
+        token?.invalidate()
+    }
     
     var todoItems: Results<TODOItem> {
         model.items
