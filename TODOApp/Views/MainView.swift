@@ -17,6 +17,11 @@ struct MainView: View {
                 ForEach(viewModel.todoItems.freeze()) { item in
                     Text("\(item.title)")
                 }
+                .onDelete { indexSet in
+                    if let index = indexSet.first {
+                        viewModel.deleteItem(viewModel.todoItems[index].id)
+                    }
+                }
             }
             .navigationTitle("TODOリスト")
             .navigationBarTitleDisplayMode(.large)
@@ -28,12 +33,35 @@ struct MainView: View {
                         Image(systemName: "plus")
                     })
                 }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    MyEditButton()
+                }
             }
         }
         .sheet(isPresented: $createView) {
             CreateView()
                 .environmentObject(ViewModel())
         }
+    }
+}
+
+struct MyEditButton: View {
+    @Environment(\.editMode) var editMode
+    
+    var body: some View {
+        Button(action: {
+            withAnimation() {
+                if editMode?.wrappedValue.isEditing == true {
+                    editMode?.wrappedValue = .inactive
+                } else {
+                    editMode?.wrappedValue = .active
+                }
+            }
+        }, label: {
+            if let isEditing = editMode?.wrappedValue.isEditing {
+                isEditing ? Text("終了") : Text("編集")
+            }
+        })
     }
 }
 
