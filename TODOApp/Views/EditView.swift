@@ -52,6 +52,5 @@ struct EditView_Previews: PreviewProvider {
         let title = ""
         EditView(id: id, title: title)
             .environmentObject(ViewModel())
-            .environmentObject(SelectedItems())
     }
 }

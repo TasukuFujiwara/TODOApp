@@ -20,40 +20,50 @@ struct MainView: View {
     
     var body: some View {
         NavigationStack {
-            List(selection: $selectedItemID) {
-                ForEach(viewModel.todoItems.freeze()) { item in
-                    NavigationLink {
-                        EditView(id: item.id, title: item.title)
-                            .environmentObject(ViewModel())
-                    } label: {
-                        Text(item.title)
+            ZStack {
+                List(selection: $selectedItemID) {
+                    ForEach(viewModel.todoItems.freeze()) { item in
+                        NavigationLink {
+                            EditView(id: item.id, title: item.title)
+                                .environmentObject(ViewModel())
+                        } label: {
+                            Text(item.title)
+                        }
                     }
                 }
-            }
-            .navigationTitle("TODOリスト")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        switch nowViewMode {
-                        case .main:
-                            createView.toggle()
-                        case .edit:
-                            for id in selectedItemID {
-                                viewModel.deleteItem(id)
+                .navigationTitle("TODOリスト")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            switch nowViewMode {
+                            case .main:
+                                createView.toggle()
+                            case .edit:
+                                for id in selectedItemID {
+                                    viewModel.deleteItem(id)
+                                }
                             }
-                        }
-                    }, label: {
-                        switch nowViewMode {
-                        case .main:
-                            Image(systemName: "plus")
-                        case .edit:
-                            Text("削除")
-                        }
-                    })
+                        }, label: {
+                            switch nowViewMode {
+                            case .main:
+                                Image(systemName: "plus")
+                            case .edit:
+                                Text("削除")
+                            }
+                        })
+                    }
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        MyEditButton(nowViewMode: $nowViewMode)
+                    }
                 }
-                ToolbarItem(placement: .navigationBarLeading) {
-                    MyEditButton(nowViewMode: $nowViewMode)
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        CreateButton(createView: $createView)
+                            .padding()
+                    }
                 }
             }
         }
@@ -82,6 +92,26 @@ struct MyEditButton: View {
                 isEditing ? Text("キャンセル") : Text("選択")
             }
         })
+    }
+}
+
+struct CreateButton: View {
+    @Binding var createView: Bool
+    var body: some View {
+        Button(action: {
+            createView.toggle()
+        }, label: {
+            Image(systemName: "plus")
+                .padding()
+                .frame(width: 70, height: 70)
+                .imageScale(.large)
+                .foregroundColor(Color.white)
+                .background(Color.blue)
+                .clipShape(Circle())
+                .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+        })
+        .padding(.top, 50.0)
+        
     }
 }
 
