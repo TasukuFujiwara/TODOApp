@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 
 enum viewMode {
@@ -16,7 +17,8 @@ struct MainView: View {
     @EnvironmentObject var viewModel: ViewModel
     @State private var createView: Bool = false
     @State private var selectedItemID: Set<UUID> = []
-    @State private var nowViewMode: viewMode = .main
+    @State private var hideDeleteButton: Bool = false
+    @State fileprivate var isEditing: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -31,30 +33,24 @@ struct MainView: View {
                         }
                     }
                 }
-                .navigationTitle("TODOリスト")
+                .navigationTitle("TODOリスト\(selectedItemID.count)")
                 .navigationBarTitleDisplayMode(.large)
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: {
-                            switch nowViewMode {
-                            case .main:
-                                createView.toggle()
-                            case .edit:
+                    if isEditing {
+                        ToolbarItem(placement:.navigationBarTrailing) {
+                            Button("削除") {
                                 for id in selectedItemID {
-                                    viewModel.deleteItem(id)
+                                    if viewModel.itemList.contains(where: { $0.id == id }) {
+                                        viewModel.deleteItem(id)
+                                    }
                                 }
+                                //hideDeleteButton.toggle()
                             }
-                        }, label: {
-                            switch nowViewMode {
-                            case .main:
-                                Image(systemName: "plus")
-                            case .edit:
-                                Text("削除")
-                            }
-                        })
+                            .disabled(hideDeleteButton)
+                        }
                     }
                     ToolbarItem(placement: .navigationBarLeading) {
-                        MyEditButton(nowViewMode: $nowViewMode)
+                        MyEditButton(isEditing: $isEditing)
                     }
                 }
                 VStack {
@@ -76,20 +72,20 @@ struct MainView: View {
 
 struct MyEditButton: View {
     @Environment(\.editMode) var editMode
-    @Binding var nowViewMode: viewMode
+    @Binding var isEditing: Bool
     
     var body: some View {
         Button(action: {
             if editMode?.wrappedValue.isEditing == true {
                 editMode?.wrappedValue = .inactive
-                nowViewMode = .main
+                isEditing = false
             } else {
                 editMode?.wrappedValue = .active
-                nowViewMode = .edit
+                isEditing = true
             }
         }, label: {
-            if let isEditing = editMode?.wrappedValue.isEditing {
-                isEditing ? Text("キャンセル") : Text("選択")
+            if let _isEditing = editMode?.wrappedValue.isEditing {
+                _isEditing ? Text("キャンセル") : Text("選択")
             }
         })
     }
@@ -108,7 +104,7 @@ struct CreateButton: View {
                 .foregroundColor(Color.white)
                 .background(Color.blue)
                 .clipShape(Circle())
-                .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                .font(.title)
         })
         .padding(.top, 50.0)
         

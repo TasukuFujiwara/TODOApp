@@ -13,7 +13,7 @@ struct EditView: View {
     @EnvironmentObject var viewModel: ViewModel
     @State var id: UUID
     @State var title: String
-    @State var isEditing: Bool = false
+    @State fileprivate var isEditing: Bool = false
 
     var body: some View {
         NavigationStack {
