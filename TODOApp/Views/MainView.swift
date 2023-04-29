@@ -15,18 +15,13 @@ enum viewMode {
 struct MainView: View {
     @EnvironmentObject var viewModel: ViewModel
     @State private var createView: Bool = false
-    @State private var hideCreateButton: Bool = false
     @State private var selectedItemID: Set<UUID> = []
-    
-    
-    
     @State private var nowViewMode: viewMode = .main
     
     var body: some View {
         NavigationStack {
             List(selection: $selectedItemID) {
                 ForEach(viewModel.todoItems.freeze()) { item in
-                    //@State var todoItem: TODOItem = item
                     NavigationLink {
                         EditView(id: item.id, title: item.title)
                             .environmentObject(ViewModel())
@@ -48,7 +43,6 @@ struct MainView: View {
                                 viewModel.deleteItem(id)
                             }
                         }
-                        //createView.toggle()
                     }, label: {
                         switch nowViewMode {
                         case .main:
@@ -56,15 +50,10 @@ struct MainView: View {
                         case .edit:
                             Text("削除")
                         }
-                        //Image(systemName: "plus")
                     })
-                    .disabled(hideCreateButton)
                 }
                 ToolbarItem(placement: .navigationBarLeading) {
-                    //EditButton()
                     MyEditButton(nowViewMode: $nowViewMode)
-                    //nowViewMode = .edit
-                    //.disabled(viewModel.todoItems.isEmpty)
                 }
             }
         }
@@ -77,7 +66,6 @@ struct MainView: View {
 
 struct MyEditButton: View {
     @Environment(\.editMode) var editMode
-    //@Binding var hideButton: Bool
     @Binding var nowViewMode: viewMode
     
     var body: some View {
