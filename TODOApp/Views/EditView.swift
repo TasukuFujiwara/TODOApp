@@ -17,34 +17,52 @@ struct EditView: View {
     @State var note: String
     @State fileprivate var isEditing: Bool = false
 
+    @State var tmpTitle: String! = nil
+    @State var tmpDueDate: Date! = nil
+    @State var tmpNote: String! = nil
+    
+    //var tmpItem: TODOItem = TODOItem()
+
     var body: some View {
         NavigationStack {
             List {
-                if !isEditing {
-                    TextField("タイトル", text: $title)
-                        .disabled(true)
-                    DatePicker("期日", selection: $dueDate)
-                        .disabled(true)
-                    TextField("メモ", text: $note)
-                        .disabled(true)
-                } else {
-                    TextField("タイトル", text: $title)
-                    DatePicker("期日", selection: $dueDate)
-                    TextField("メモ", text: $note)
-                }
+                TextField("タイトル", text: $title)
+                DatePicker("期日", selection: $dueDate)
+                    .datePickerStyle(.compact)
+                TextField("メモ", text: $note, axis: .vertical)
+                    .frame(height: 200)
             }
+            .disabled(!isEditing)
             .navigationTitle(isEditing ? "編集" : "詳細")
+            .navigationBarBackButtonHidden(true)
             .toolbar {
                 if isPresented {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         if !isEditing {
                             Button("編集") {
+                                tmpTitle = title
+                                tmpDueDate = dueDate
+                                tmpNote = note
                                 isEditing.toggle()
                             }
                         } else {
                             Button("適用") {
                                 viewModel.editItem(id: id, title: title, dueDate: dueDate, note: note)
                                 dismiss()
+                            }
+                        }
+                    }
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        if !isEditing {
+                            Button("< TODOリスト") {
+                                dismiss()
+                            }
+                        } else {
+                            Button("キャンセル") {
+                                title = tmpTitle
+                                dueDate = tmpDueDate
+                                note = tmpNote
+                                isEditing.toggle()
                             }
                         }
                     }

@@ -20,7 +20,9 @@ struct CreateView: View {
             List {
                 TextField("タイトル", text: $title)
                 DatePicker("期日", selection: $dueDate)
+                    .datePickerStyle(.compact)
                 TextField("メモ", text: $note)
+                    .frame(height: 200)
             }
             .navigationTitle("新規作成")
             .toolbar {

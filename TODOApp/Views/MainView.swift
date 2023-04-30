@@ -6,18 +6,11 @@
 //
 
 import SwiftUI
-import Combine
-
-
-enum viewMode {
-    case main, edit
-}
 
 struct MainView: View {
     @EnvironmentObject var viewModel: ViewModel
     @State private var createView: Bool = false
     @State private var selectedItemID: Set<UUID> = []
-    @State private var hideDeleteButton: Bool = false
     @State fileprivate var isEditing: Bool = false
     
     var body: some View {
@@ -44,9 +37,7 @@ struct MainView: View {
                                         viewModel.deleteItem(id)
                                     }
                                 }
-                                //hideDeleteButton.toggle()
                             }
-                            .disabled(hideDeleteButton)
                         }
                     }
                     ToolbarItem(placement: .navigationBarLeading) {
