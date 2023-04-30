@@ -26,14 +26,14 @@ struct MainView: View {
                 List(selection: $selectedItemID) {
                     ForEach(viewModel.todoItems.freeze()) { item in
                         NavigationLink {
-                            EditView(id: item.id, title: item.title)
+                            EditView(id: item.id, title: item.title, dueDate: item.dueDate, note: item.note)
                                 .environmentObject(ViewModel())
                         } label: {
                             Text(item.title)
                         }
                     }
                 }
-                .navigationTitle("TODOリスト\(selectedItemID.count)")
+                .navigationTitle("TODOリスト")
                 .navigationBarTitleDisplayMode(.large)
                 .toolbar {
                     if isEditing {
@@ -84,8 +84,8 @@ struct MyEditButton: View {
                 isEditing = true
             }
         }, label: {
-            if let _isEditing = editMode?.wrappedValue.isEditing {
-                _isEditing ? Text("キャンセル") : Text("選択")
+            if let isediting = editMode?.wrappedValue.isEditing {
+                isediting ? Text("キャンセル") : Text("選択")
             }
         })
     }

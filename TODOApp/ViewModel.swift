@@ -51,10 +51,12 @@ class ViewModel: ObservableObject {
         model.items
     }
     
-    func addItem(_ title: String) {
+    func addItem(title: String, dueDate: Date, note: String) {
         let newItem = TODOItem()
         newItem.id = UUID()
         newItem.title = title
+        newItem.dueDate = dueDate
+        newItem.note = note
         model.addItem(newItem)
     }
     
@@ -63,8 +65,8 @@ class ViewModel: ObservableObject {
         model.deleteItem(item)
     }
     
-    func editItem(id: TODOItem.ID, title: String) {
+    func editItem(id: TODOItem.ID, title: String, dueDate: Date, note: String) {
         guard let _ = model.itemFromID(id) else { fatalError("id: \(id) not exists") }
-        model.editItem(id: id, title: title)
+        model.editItem(id: id, title: title, dueDate: dueDate, note: note)
     }
 }
