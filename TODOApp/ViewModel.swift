@@ -48,7 +48,7 @@ class ViewModel: ObservableObject {
     }
     
     var todoItems: Results<TODOItem> {
-        model.items
+        model.items.sorted(by: \.dueDate)
     }
     
     func addItem(title: String, dueDate: Date, note: String) {
