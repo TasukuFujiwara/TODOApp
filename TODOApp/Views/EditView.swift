@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+
+
 struct EditView: View {
     @Environment(\.isPresented) var isPresented
     @Environment(\.dismiss) var dismiss
@@ -16,23 +18,39 @@ struct EditView: View {
     @State var dueDate: Date
     @State var note: String
     @State fileprivate var isEditing: Bool = false
-
-    @State var tmpTitle: String! = nil
-    @State var tmpDueDate: Date! = nil
-    @State var tmpNote: String! = nil
     
-    //var tmpItem: TODOItem = TODOItem()
+    //@Binding var selectedItemID: Set<UUID>
+
+    static var tmpTitle: String! = nil
+    static var tmpDueDate: Date! = nil
+    static var tmpNote: String! = nil
+    
+    static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy/MM/dd HH:mm"
+        return formatter
+    }()
 
     var body: some View {
         NavigationStack {
             List {
-                TextField("タイトル", text: $title)
-                DatePicker("期日", selection: $dueDate)
-                    .datePickerStyle(.compact)
-                TextField("メモ", text: $note, axis: .vertical)
-                    .frame(height: 200)
+                if !isEditing {
+                    Text(title)
+                    HStack {
+                        Text("期日")
+                        Spacer()
+                        Text("\(Self.dateFormatter.string(from: dueDate))")
+                    }
+                    Text(note)
+                        .frame(height: 200)
+                } else {
+                    TextField("タイトル", text: $title)
+                    DatePicker("期日", selection: $dueDate)
+                        .datePickerStyle(.compact)
+                    TextField("メモ", text: $note, axis: .vertical)
+                        .frame(height: 200)
+                }
             }
-            .disabled(!isEditing)
             .navigationTitle(isEditing ? "編集" : "詳細")
             .navigationBarBackButtonHidden(true)
             .toolbar {
@@ -40,14 +58,15 @@ struct EditView: View {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         if !isEditing {
                             Button("編集") {
-                                tmpTitle = title
-                                tmpDueDate = dueDate
-                                tmpNote = note
+                                Self.tmpTitle = title
+                                Self.tmpDueDate = dueDate
+                                Self.tmpNote = note
                                 isEditing.toggle()
                             }
                         } else {
                             Button("適用") {
                                 viewModel.editItem(id: id, title: title, dueDate: dueDate, note: note)
+                                //selectedItemID = []
                                 dismiss()
                             }
                         }
@@ -55,13 +74,14 @@ struct EditView: View {
                     ToolbarItem(placement: .navigationBarLeading) {
                         if !isEditing {
                             Button("< TODOリスト") {
+                                //selectedItemID = []
                                 dismiss()
                             }
                         } else {
                             Button("キャンセル") {
-                                title = tmpTitle
-                                dueDate = tmpDueDate
-                                note = tmpNote
+                                title = Self.tmpTitle
+                                dueDate = Self.tmpDueDate
+                                note = Self.tmpNote
                                 isEditing.toggle()
                             }
                         }
@@ -78,7 +98,7 @@ struct EditView_Previews: PreviewProvider {
         let title = ""
         let dueDate = Date()
         let note = ""
-        EditView(id: id, title: title, dueDate: dueDate, note: note)
+        EditView(id: id, title: title, dueDate: dueDate, note: note/*, selectedItemID: Binding.constant([])*/)
             .environmentObject(ViewModel())
     }
 }

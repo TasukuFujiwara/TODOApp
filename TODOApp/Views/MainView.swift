@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MainView: View {
+    @Environment(\.editMode) var editMode
     @EnvironmentObject var viewModel: ViewModel
     @State private var createView: Bool = false
     @State private var selectedItemID: Set<UUID> = []
@@ -26,30 +27,32 @@ struct MainView: View {
                         }
                     }
                 }
-                .navigationTitle("TODOリスト")
+                .navigationTitle("TODOリスト\(selectedItemID.count)")
                 .navigationBarTitleDisplayMode(.large)
                 .toolbar {
                     if isEditing {
                         ToolbarItem(placement:.navigationBarTrailing) {
                             Button("削除") {
                                 for id in selectedItemID {
-                                    if viewModel.itemList.contains(where: { $0.id == id }) {
-                                        viewModel.deleteItem(id)
-                                    }
+                                    viewModel.deleteItem(id)
                                 }
+                                selectedItemID = []
                             }
+                            .disabled(selectedItemID.isEmpty)
                         }
                     }
                     ToolbarItem(placement: .navigationBarLeading) {
-                        MyEditButton(isEditing: $isEditing)
+                        MyEditButton(isEditing: $isEditing, selectedItemId: $selectedItemID)
                     }
                 }
                 VStack {
                     Spacer()
                     HStack {
                         Spacer()
-                        CreateButton(createView: $createView)
-                            .padding()
+                        if !isEditing {
+                            CreateButton(createView: $createView)
+                                .padding()
+                        }
                     }
                 }
             }
@@ -64,6 +67,7 @@ struct MainView: View {
 struct MyEditButton: View {
     @Environment(\.editMode) var editMode
     @Binding var isEditing: Bool
+    @Binding var selectedItemId: Set<UUID>
     
     var body: some View {
         Button(action: {
@@ -74,6 +78,7 @@ struct MyEditButton: View {
                 editMode?.wrappedValue = .active
                 isEditing = true
             }
+            selectedItemId = []
         }, label: {
             if let isediting = editMode?.wrappedValue.isEditing {
                 isediting ? Text("キャンセル") : Text("選択")
