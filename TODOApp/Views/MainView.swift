@@ -37,12 +37,17 @@ struct MainView: View {
                                     viewModel.deleteItem(id)
                                 }
                                 selectedItemID = []
+                                if viewModel.todoItems.count == 0 {
+                                    editMode?.wrappedValue = .inactive
+                                    isEditing = false
+                                }
                             }
                             .disabled(selectedItemID.isEmpty)
                         }
                     }
                     ToolbarItem(placement: .navigationBarLeading) {
                         MyEditButton(isEditing: $isEditing, selectedItemId: $selectedItemID)
+                            .environmentObject(ViewModel())
                     }
                 }
                 VStack {
@@ -66,6 +71,7 @@ struct MainView: View {
 
 struct MyEditButton: View {
     @Environment(\.editMode) var editMode
+    @EnvironmentObject var viewModel: ViewModel
     @Binding var isEditing: Bool
     @Binding var selectedItemId: Set<UUID>
     
@@ -80,10 +86,9 @@ struct MyEditButton: View {
             }
             selectedItemId = []
         }, label: {
-            if let isediting = editMode?.wrappedValue.isEditing {
-                isediting ? Text("キャンセル") : Text("選択")
-            }
+            isEditing ? Text("キャンセル") : Text("選択")
         })
+        .disabled(viewModel.todoItems.isEmpty)
     }
 }
 

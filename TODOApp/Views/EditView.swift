@@ -18,8 +18,6 @@ struct EditView: View {
     @State var dueDate: Date
     @State var note: String
     @State fileprivate var isEditing: Bool = false
-    
-    //@Binding var selectedItemID: Set<UUID>
 
     static var tmpTitle: String! = nil
     static var tmpDueDate: Date! = nil
@@ -66,7 +64,6 @@ struct EditView: View {
                         } else {
                             Button("適用") {
                                 viewModel.editItem(id: id, title: title, dueDate: dueDate, note: note)
-                                //selectedItemID = []
                                 dismiss()
                             }
                         }
@@ -74,7 +71,6 @@ struct EditView: View {
                     ToolbarItem(placement: .navigationBarLeading) {
                         if !isEditing {
                             Button("< TODOリスト") {
-                                //selectedItemID = []
                                 dismiss()
                             }
                         } else {
@@ -98,7 +94,7 @@ struct EditView_Previews: PreviewProvider {
         let title = ""
         let dueDate = Date()
         let note = ""
-        EditView(id: id, title: title, dueDate: dueDate, note: note/*, selectedItemID: Binding.constant([])*/)
+        EditView(id: id, title: title, dueDate: dueDate, note: note)
             .environmentObject(ViewModel())
     }
 }
