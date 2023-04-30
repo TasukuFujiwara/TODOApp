@@ -57,6 +57,6 @@ class DBModel: ObservableObject {
 class TODOItem: Object, Identifiable {
     @Persisted(primaryKey: true) var id: UUID = UUID()
     @Persisted var title: String
-    @Persisted var dueDate: Date = Date()
-    @Persisted var note: String = ""
+    /*@Persisted*/ var dueDate: Date = Date()
+    /*@Persisted*/ var note: String = ""
 }
