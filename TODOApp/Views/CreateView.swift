@@ -10,6 +10,8 @@ import SwiftUI
 struct CreateView: View {
     @EnvironmentObject var viewModel: ViewModel
     @State private var title: String = ""
+    @State private var dueDate: Date = Date()
+    @State private var note: String = ""
     @Environment(\.dismiss) var dismiss
     @Environment(\.isPresented) var isPresented
     
@@ -17,6 +19,8 @@ struct CreateView: View {
         NavigationStack {
             List {
                 TextField("タイトル", text: $title)
+                DatePicker("期日", selection: $dueDate)
+                TextField("メモ", text: $note)
             }
             .navigationTitle("新規作成")
             .toolbar {
@@ -30,7 +34,10 @@ struct CreateView: View {
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: {
-                            viewModel.addItem(title)
+                            viewModel.addItem(
+                                title: title == "" ? "New Title" : title,
+                                dueDate: dueDate,
+                                note: note)
                             if isPresented {
                                 dismiss()
                             }

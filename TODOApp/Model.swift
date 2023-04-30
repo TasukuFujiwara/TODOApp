@@ -42,11 +42,13 @@ class DBModel: ObservableObject {
         }
     }
     
-    func editItem(id: UUID, title: String) {
+    func editItem(id: UUID, title: String, dueDate: Date, note: String) {
         guard let item = itemFromID(id) else { fatalError("id: \(id) not exists") }
         self.objectWillChange.send()
         try! realm.write {
             item.title = title
+            item.dueDate = dueDate
+            item.note = note
         }
     }
 }
@@ -55,4 +57,6 @@ class DBModel: ObservableObject {
 class TODOItem: Object, Identifiable {
     @Persisted(primaryKey: true) var id: UUID = UUID()
     @Persisted var title: String
+    @Persisted var dueDate: Date = Date()
+    @Persisted var note: String = ""
 }
