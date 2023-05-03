@@ -31,9 +31,18 @@ struct MainView: View {
                             HStack {
                                 Text(item.title)
                                 Spacer()
-                                if selectedItemID.contains(item.id) {   // アイテムが選択されていたら
-                                    Image(systemName: "checkmark")      // チェックマークをつける
+                                ZStack {
+                                    if selectedItemID.contains(item.id) {   // アイテムが選択されていたら
+                                        // チェックマークをつける
+                                        Image(systemName: "circle.fill")
+                                            .foregroundColor(Color.blue)
+                                            .imageScale(/*@START_MENU_TOKEN@*/.medium/*@END_MENU_TOKEN@*/)
+                                    }
+                                    Image(systemName: "circle")
+                                        .foregroundColor(Color.gray)
+                                        .imageScale(/*@START_MENU_TOKEN@*/.large/*@END_MENU_TOKEN@*/)
                                 }
+
                             }
                             .contentShape(Rectangle())
                             .onTapGesture {         // アイテムをタップした時
@@ -52,7 +61,7 @@ struct MainView: View {
 
                     }
                 }
-                .navigationTitle("TODOリスト\(selectedItemID.count)")
+                .navigationTitle("TODOリスト")
                 .navigationBarTitleDisplayMode(.large)
                 // ツールバー
                 .toolbar {
