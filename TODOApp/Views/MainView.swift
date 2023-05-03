@@ -39,8 +39,9 @@ struct MainView: View {
                                 selectedItemID = []
                                 if viewModel.todoItems.count == 0 {
                                     editMode?.wrappedValue = .inactive
-                                    isEditing = false
+//                                    isEditing = false
                                 }
+                                isEditing.toggle()
                             }
                             .disabled(selectedItemID.isEmpty)
                         }
@@ -79,11 +80,12 @@ struct MyEditButton: View {
         Button(action: {
             if editMode?.wrappedValue.isEditing == true {
                 editMode?.wrappedValue = .inactive
-                isEditing = false
+//                isEditing = false
             } else {
                 editMode?.wrappedValue = .active
-                isEditing = true
+//                isEditing = true
             }
+            isEditing.toggle()
             selectedItemId = []
         }, label: {
             isEditing ? Text("キャンセル") : Text("選択")
