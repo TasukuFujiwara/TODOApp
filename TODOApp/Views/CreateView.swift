@@ -7,16 +7,18 @@
 
 import SwiftUI
 
+// 新規作成画面
 struct CreateView: View {
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var viewModel: ViewModel         // ビューモデル
     @State private var title: String = ""
     @State private var dueDate: Date = Date()
     @State private var note: String = ""
-    @Environment(\.dismiss) var dismiss
-    @Environment(\.isPresented) var isPresented
+    @Environment(\.dismiss) var dismiss                 // 遷移元に戻る
+    @Environment(\.isPresented) var isPresented         // 他の画面から遷移してきたかどうか
     
     var body: some View {
         NavigationStack {
+            // 入力フォーム
             List {
                 TextField("タイトル", text: $title)
                 DatePicker("期日", selection: $dueDate)
@@ -26,26 +28,24 @@ struct CreateView: View {
             }
             .navigationTitle("新規作成")
             .toolbar {
+                // 他の画面（メイン画面）から遷移してきた場合
                 if isPresented {
                     ToolbarItem(placement: .navigationBarLeading) {
-                        Button(action: {
+                        // 遷移元に戻る
+                        Button("キャンセル") {
                             dismiss()
-                        }, label: {
-                            Text("キャンセル")
-                        })
+                        }
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(action: {
+                        // データをデータベースに追加．遷移元に戻る
+                        Button("追加") {
                             viewModel.addItem(
                                 title: title == "" ? "New Title" : title,
                                 dueDate: dueDate,
-                                note: note)
-                            if isPresented {
-                                dismiss()
-                            }
-                        }, label: {
-                            Text("追加")
-                        })
+                                note: note
+                            )
+                            dismiss()
+                        }
                     }
                 }
             }

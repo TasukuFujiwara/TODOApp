@@ -7,41 +7,43 @@
 
 import SwiftUI
 
+
+// メイン画面
 struct MainView: View {
-    @EnvironmentObject var viewModel: ViewModel
-    @State private var createView: Bool = false
-    @State private var selectedItemID: Set<UUID> = []
-    @State fileprivate var isEditing: Bool = false
+    @EnvironmentObject var viewModel: ViewModel             // ビューモデル
+    @State private var createView: Bool = false             // 新規作成画面に移るかどうか
+    @State private var selectedItemID: Set<UUID> = []       // 選択したTODOアイテムを格納する
+    @State fileprivate var isEditing: Bool = false          // アイテムを選択できる状態かどうか
     
     var body: some View {
         NavigationStack {
             ZStack {
                 List {
                     ForEach(viewModel.todoItems.freeze()) { item in
-                        if !isEditing {
+                        if !isEditing {     // アイテム選択可能状態でない時
                             NavigationLink {
-                                EditView(id: item.id, title: item.title, dueDate: item.dueDate, note: item.note)
+                                EditView(id: item.id, title: item.title, dueDate: item.dueDate, note: item.note)        // 詳細・編集画面へ遷移
                                     .environmentObject(ViewModel())
                             } label: {
-                                Text(item.title)
+                                Text(item.title)      // ラベルとして，タイトルのみ表示しておく
                             }
-                        } else {
+                        } else {            // アイテム選択可能状態である時
                             HStack {
                                 Text(item.title)
                                 Spacer()
-                                if selectedItemID.contains(item.id) {
-                                    Image(systemName: "checkmark")
+                                if selectedItemID.contains(item.id) {   // アイテムが選択されていたら
+                                    Image(systemName: "checkmark")      // チェックマークをつける
                                 }
                             }
                             .contentShape(Rectangle())
-                            .onTapGesture {
+                            .onTapGesture {         // アイテムをタップした時
                                 withAnimation {
-                                    if selectedItemID.contains(item.id) {
+                                    if selectedItemID.contains(item.id) {       // アイテムが選択されていれば，チェックを外す
                                         selectedItemID.remove(item.id)
-                                        if selectedItemID.count == 0 {
-                                            isEditing = false
-                                        }
-                                    } else {
+//                                        if viewModel.todoItems.count == 0 {
+//                                            isEditing = false
+//                                        }
+                                    } else {        // アイテムが選択されていなければ，チェックをつける
                                         selectedItemID.insert(item.id)
                                     }
                                 }
@@ -52,15 +54,16 @@ struct MainView: View {
                 }
                 .navigationTitle("TODOリスト\(selectedItemID.count)")
                 .navigationBarTitleDisplayMode(.large)
+                // ツールバー
                 .toolbar {
-                    if isEditing {
+                    if isEditing {  // 選択可能状態
                         ToolbarItem(placement:.navigationBarTrailing) {
-                            Button("削除") {
-                                for id in selectedItemID {
+                            Button("削除") {  // アイテムが1つ以上選択されていれば，押せる状態に
+                                for id in selectedItemID {      // 選択したアイテムを削除
                                     viewModel.deleteItem(id)
+                                    selectedItemID.remove(id)
                                 }
-                                selectedItemID = []
-                                if viewModel.todoItems.count == 0 {
+                                if viewModel.todoItems.count == 0 {     // TODOアイテムがなくなったら，選択可能状態を終了
                                     isEditing = false
                                 }
                             }
@@ -68,17 +71,20 @@ struct MainView: View {
                         }
                     }
                     ToolbarItem(placement: .navigationBarLeading) {
+                        // 選択可能状態なら，”キャンセル”，そうでなければ，”選択”
+                        // TODOアイテムが1つ以上ある場合に押せる
                         Button(isEditing ? "キャンセル" : "選択") {
                             isEditing.toggle()
                         }
                         .disabled(viewModel.todoItems.isEmpty)
                     }
                 }
+                // 新規作成ボタン
                 VStack {
                     Spacer()
                     HStack {
                         Spacer()
-                        if !isEditing {
+                        if !isEditing {     // 選択可能状態でないなら，表示
                             CreateButton(createView: $createView)
                                 .padding()
                         }
@@ -86,6 +92,7 @@ struct MainView: View {
                 }
             }
         }
+        // モーダル遷移で新規作成画面へ
         .sheet(isPresented: $createView) {
             CreateView()
                 .environmentObject(ViewModel())
@@ -93,12 +100,14 @@ struct MainView: View {
     }
 }
 
+// 新規作成ボタン
 struct CreateButton: View {
     @Binding var createView: Bool
     var body: some View {
         Button(action: {
             createView.toggle()
         }, label: {
+            // 見た目
             Image(systemName: "plus")
                 .padding()
                 .frame(width: 70, height: 70)
