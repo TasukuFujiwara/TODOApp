@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct MainView: View {
-    @Environment(\.editMode) var editMode
     @EnvironmentObject var viewModel: ViewModel
     @State private var createView: Bool = false
     @State private var selectedItemID: Set<UUID> = []
@@ -17,14 +16,38 @@ struct MainView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                List(selection: $selectedItemID) {
+                List {
                     ForEach(viewModel.todoItems.freeze()) { item in
-                        NavigationLink {
-                            EditView(id: item.id, title: item.title, dueDate: item.dueDate, note: item.note)
-                                .environmentObject(ViewModel())
-                        } label: {
-                            Text(item.title)
+                        if !isEditing {
+                            NavigationLink {
+                                EditView(id: item.id, title: item.title, dueDate: item.dueDate, note: item.note)
+                                    .environmentObject(ViewModel())
+                            } label: {
+                                Text(item.title)
+                            }
+                        } else {
+                            HStack {
+                                Text(item.title)
+                                Spacer()
+                                if selectedItemID.contains(item.id) {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                withAnimation {
+                                    if selectedItemID.contains(item.id) {
+                                        selectedItemID.remove(item.id)
+                                        if selectedItemID.count == 0 {
+                                            isEditing = false
+                                        }
+                                    } else {
+                                        selectedItemID.insert(item.id)
+                                    }
+                                }
+                            }
                         }
+
                     }
                 }
                 .navigationTitle("TODOリスト\(selectedItemID.count)")
@@ -38,17 +61,17 @@ struct MainView: View {
                                 }
                                 selectedItemID = []
                                 if viewModel.todoItems.count == 0 {
-                                    editMode?.wrappedValue = .inactive
-//                                    isEditing = false
+                                    isEditing = false
                                 }
-                                isEditing.toggle()
                             }
                             .disabled(selectedItemID.isEmpty)
                         }
                     }
                     ToolbarItem(placement: .navigationBarLeading) {
-                        MyEditButton(isEditing: $isEditing, selectedItemId: $selectedItemID)
-                            .environmentObject(ViewModel())
+                        Button(isEditing ? "キャンセル" : "選択") {
+                            isEditing.toggle()
+                        }
+                        .disabled(viewModel.todoItems.isEmpty)
                     }
                 }
                 VStack {
@@ -67,30 +90,6 @@ struct MainView: View {
             CreateView()
                 .environmentObject(ViewModel())
         }
-    }
-}
-
-struct MyEditButton: View {
-    @Environment(\.editMode) var editMode
-    @EnvironmentObject var viewModel: ViewModel
-    @Binding var isEditing: Bool
-    @Binding var selectedItemId: Set<UUID>
-    
-    var body: some View {
-        Button(action: {
-            if editMode?.wrappedValue.isEditing == true {
-                editMode?.wrappedValue = .inactive
-//                isEditing = false
-            } else {
-                editMode?.wrappedValue = .active
-//                isEditing = true
-            }
-            isEditing.toggle()
-            selectedItemId = []
-        }, label: {
-            isEditing ? Text("キャンセル") : Text("選択")
-        })
-        .disabled(viewModel.todoItems.isEmpty)
     }
 }
 
