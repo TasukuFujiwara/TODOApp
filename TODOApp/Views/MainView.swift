@@ -12,6 +12,7 @@ import SwiftUI
 struct MainView: View {
     @EnvironmentObject var viewModel: ViewModel             // ビューモデル
     @State private var createView: Bool = false             // 新規作成画面に移るかどうか
+    @State private var categoryView: Bool = false
     @State private var selectedItemID: Set<UUID> = []       // 選択したTODOアイテムを格納する
     @State fileprivate var isEditing: Bool = false          // アイテムを選択できる状態かどうか
     
@@ -49,9 +50,6 @@ struct MainView: View {
                                 withAnimation {
                                     if selectedItemID.contains(item.id) {       // アイテムが選択されていれば，チェックを外す
                                         selectedItemID.remove(item.id)
-//                                        if viewModel.todoItems.count == 0 {
-//                                            isEditing = false
-//                                        }
                                     } else {        // アイテムが選択されていなければ，チェックをつける
                                         selectedItemID.insert(item.id)
                                     }
@@ -65,28 +63,33 @@ struct MainView: View {
                 .navigationBarTitleDisplayMode(.large)
                 // ツールバー
                 .toolbar {
-                    if isEditing {  // 選択可能状態
-                        ToolbarItem(placement:.navigationBarTrailing) {
-                            Button("削除") {  // アイテムが1つ以上選択されていれば，押せる状態に
+                    ToolbarItem(placement:.navigationBarTrailing) {
+                        Button(isEditing ? "削除" : "選択") {  // アイテムが1つ以上選択されていれば，押せる状態に
+                            if isEditing {
                                 for id in selectedItemID {      // 選択したアイテムを削除
                                     viewModel.deleteItem(id)
                                     selectedItemID.remove(id)
                                 }
-                                if viewModel.todoItems.count == 0 {     // TODOアイテムがなくなったら，選択可能状態を終了
+                                if viewModel.todoItems.isEmpty {     // TODOアイテムがなくなったら，選択可能状態を終了
                                     isEditing = false
                                 }
+                            } else {
+                                isEditing.toggle()
                             }
-                            .disabled(selectedItemID.isEmpty)
-                        }
-                    }
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        // 選択可能状態なら，”キャンセル”，そうでなければ，”選択”
-                        // TODOアイテムが1つ以上ある場合に押せる
-                        Button(isEditing ? "キャンセル" : "選択") {
-                            isEditing.toggle()
                         }
                         .disabled(viewModel.todoItems.isEmpty)
                     }
+                    if isEditing {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            // 選択可能状態なら，”キャンセル”，そうでなければ，”選択”
+                            // TODOアイテムが1つ以上ある場合に押せる
+                            Button("キャンセル") {
+                                isEditing.toggle()
+                            }
+                            .disabled(viewModel.todoItems.isEmpty)
+                        }
+                    }
+
                 }
                 // 新規作成ボタン
                 VStack {
@@ -94,8 +97,11 @@ struct MainView: View {
                     HStack {
                         Spacer()
                         if !isEditing {     // 選択可能状態でないなら，表示
-                            CreateButton(createView: $createView)
-                                .padding()
+                            VStack {
+                                CreateButton(createView: $createView)
+                                    .padding()
+                                CategoryButton(categoryView: $categoryView)
+                            }
                         }
                     }
                 }
@@ -128,6 +134,24 @@ struct CreateButton: View {
         })
         .padding(.top, 50.0)
         
+    }
+}
+
+struct CategoryButton: View {
+    @Binding var categoryView: Bool
+    var body: some View {
+        Button(action: {
+            categoryView.toggle()
+        }, label: {
+            Image(systemName: "folder.fill")
+                .padding()
+                .frame(width: 70, height: 70)
+                .imageScale(.large)
+                .foregroundColor(Color.white)
+                .background(Color.blue)
+                .clipShape(Circle())
+                .font(.title)
+        })
     }
 }
 
