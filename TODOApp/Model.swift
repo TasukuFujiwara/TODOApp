@@ -13,7 +13,7 @@ class DBModel: ObservableObject {
     var config: Realm.Configuration
     
     init() {
-        config = Realm.Configuration(schemaVersion: 2)          // モデル定義を変更したら，schemaVersionの値を増やさないといけない
+        config = Realm.Configuration(schemaVersion: 0)          // モデル定義を変更したら，schemaVersionの値を増やさないといけない
     }
     
     var realm: Realm {
