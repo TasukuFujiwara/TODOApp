@@ -69,7 +69,7 @@ struct MainView: View {
                             categoryView = false
                         }
                     }
-                    .navigationTitle(categoryView ? "" : "TODOリスト")
+                    .navigationTitle(categoryView ? "フォルダ" : "TODOリスト")
                     .navigationBarTitleDisplayMode(.large)
                     .offset(x: (categoryView && !isEditing) ? xOffset : 0)
                     .animation(.easeInOut(duration: 0.3), value: (categoryView && !isEditing))

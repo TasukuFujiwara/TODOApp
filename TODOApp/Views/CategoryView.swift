@@ -7,13 +7,23 @@
 
 import SwiftUI
 
+
 struct CategoryView: View {
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
-        ZStack {
-            Color.blue
-            Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        var textColor: Color = colorScheme == .light ? .black : .white
+        NavigationStack {
+            ZStack(alignment: .leading) {
+                Color.blue
+                Text("Hello, World!")
+                    .padding()
+            }
+            .edgesIgnoringSafeArea(.all)
+            .foregroundColor(textColor)
+            
+            
         }
-        .edgesIgnoringSafeArea(.all)
     }
 }
 
