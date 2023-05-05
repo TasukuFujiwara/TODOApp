@@ -71,19 +71,19 @@ struct MainView: View {
                     }
                     .navigationTitle(categoryView ? "" : "TODOリスト")
                     .navigationBarTitleDisplayMode(.large)
-                    .offset(x: categoryView ? xOffset : 0)
-                    .animation(.easeInOut(duration: 0.3), value: categoryView)
+                    .offset(x: (categoryView && !isEditing) ? xOffset : 0)
+                    .animation(.easeInOut(duration: 0.3), value: (categoryView && !isEditing))
                     .gesture(
                         DragGesture()
                             .onChanged { value in
                                 let offset = value.translation.width
-                                if offset > 0 {
+                                if offset > 0, !isEditing {
                                     categoryView = true
                                 }
                             }
                             .onEnded { value in
                                 let offset = value.translation.width
-                                if offset < xOffset / 2 {
+                                if offset < xOffset / 2, !isEditing {
                                     categoryView = false
                                 }
                             }
@@ -166,6 +166,7 @@ struct CreateButton: View {
     }
 }
 
+// カテゴリーボタン
 struct CategoryButton: View {
     @Binding var categoryView: Bool
     var body: some View {
