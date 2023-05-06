@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import RealmSwift
 
 
 // メイン画面
@@ -15,18 +16,22 @@ struct MainView: View {
     @State private var categoryView: Bool = false
     @State private var selectedItemID: Set<UUID> = []       // 選択したTODOアイテムを格納する
     @State fileprivate var isEditing: Bool = false          // アイテムを選択できる状態かどうか
+    @State var nowCategory: String = "なし"
     
     var body: some View {
         GeometryReader { geometry in
             let xOffset = geometry.size.width * 0.65
             NavigationStack {
                 ZStack {
-                    CategoryView()
+                    CategoryView(nowCategory: $nowCategory, categoryView: $categoryView)
+                        .environmentObject(ViewModel())
                         //.frame(width: xOffset)
                         //.animation(.easeInOut(duration: 0.5), value: categoryView)
                     
                     List {
-                        ForEach(viewModel.todoItems.freeze()) { item in
+//                        let array: [TODOItem] = nowCategory == "なし" ? Array(viewModel.todoItems) : viewModel.itemDict[nowCategory]!
+                        let array = Array(viewModel.todoItems)
+                        ForEach(array, id: \.self) { item in
                             if !isEditing {     // アイテム選択可能状態でない時
                                 NavigationLink {
                                     EditView(id: item.id, title: item.title, dueDate: item.dueDate, note: item.note, category: item.category)        // 詳細・編集画面へ遷移
@@ -65,7 +70,7 @@ struct MainView: View {
                             }
                         }   // ForEach
                     }   // List
-                    .navigationTitle(categoryView ? "フォルダ" : "TODOリスト")
+                    .navigationTitle(categoryView ? "フォルダ" : (nowCategory == "なし" ? "全てのTODO" : nowCategory))
                     .navigationBarTitleDisplayMode(.large)
                     .offset(x: (categoryView && !isEditing) ? xOffset : 0)
                     .animation(.easeInOut(duration: 0.3), value: (categoryView && !isEditing))
