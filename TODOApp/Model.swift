@@ -13,7 +13,9 @@ class DBModel: ObservableObject {
     var config: Realm.Configuration
     
     init() {
-        config = Realm.Configuration(schemaVersion: 0)          // モデル定義を変更したら，schemaVersionの値を増やさないといけない
+        config = Realm.Configuration(
+            schemaVersion: 9
+        )          // モデル定義を変更したら，schemaVersionの値を増やさないといけない
     }
     
     var realm: Realm {
@@ -47,7 +49,7 @@ class DBModel: ObservableObject {
     }
     
     // データベースにあるアイテムを編集
-    func editItem(id: UUID, title: String, dueDate: Date, note: String) {
+    func editItem(id: UUID, title: String, dueDate: Date, note: String, category: String) {
         guard let item = itemFromID(id) else { fatalError("id: \(id) not exists") }     // idからアイテムを検索．なかったらエラー
         self.objectWillChange.send()
         // アイテムのデータを編集
@@ -55,6 +57,7 @@ class DBModel: ObservableObject {
             item.title = title
             item.dueDate = dueDate
             item.note = note
+            item.category = category
         }
     }
 }
@@ -65,4 +68,5 @@ class TODOItem: Object, Identifiable {
     @Persisted var title: String                                // タイトル
     @Persisted var dueDate: Date                                // 期日
     @Persisted var note: String                                 // メモ
+    @Persisted var category: String                             // カテゴリー
 }

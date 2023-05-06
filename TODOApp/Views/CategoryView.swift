@@ -12,7 +12,7 @@ struct CategoryView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        var textColor: Color = colorScheme == .light ? .black : .white
+        let textColor: Color = colorScheme == .light ? .black : .white
         NavigationStack {
             ZStack(alignment: .leading) {
                 Color.blue
@@ -21,11 +21,9 @@ struct CategoryView: View {
             }
             .edgesIgnoringSafeArea(.all)
             .foregroundColor(textColor)
-            
-            
-        }
-    }
-}
+        }   // NavigationStack
+    }   // body
+}   // CategoryView
 
 struct CategoryView_Previews: PreviewProvider {
     static var previews: some View {

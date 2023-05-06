@@ -13,16 +13,24 @@ struct CreateView: View {
     @State private var title: String = ""
     @State private var dueDate: Date = Date()
     @State private var note: String = ""
+    @State private var category: String = "なし"
     @Environment(\.dismiss) var dismiss                 // 遷移元に戻る
     @Environment(\.isPresented) var isPresented         // 他の画面から遷移してきたかどうか
+    
+    let sampleCategories = ["なし", "仕事", "プライベート", "重要"]
     
     var body: some View {
         NavigationStack {
             // 入力フォーム
-            List {
+            Form {
                 TextField("タイトル", text: $title)
                 DatePicker("期日", selection: $dueDate)
                     .datePickerStyle(.compact)
+                Picker("フォルダ", selection: $category) {
+                    ForEach(sampleCategories, id: \.self) { key in
+                        Text(key)
+                    }
+                }
                 TextField("メモ", text: $note)
                     .frame(height: 200)
             }
@@ -42,16 +50,17 @@ struct CreateView: View {
                             viewModel.addItem(
                                 title: title == "" ? "New Title" : title,
                                 dueDate: dueDate,
-                                note: note
+                                note: note,
+                                category: category
                             )
                             dismiss()
                         }
                     }
-                }
-            }
-        }
-    }
-}
+                }   // if isPresented
+            }   // toolbar
+        }   // NavigationStack
+    }   // body
+}   // CreateView
 
 struct CreateView_Previews: PreviewProvider {
     static var previews: some View {

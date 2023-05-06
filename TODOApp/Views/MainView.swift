@@ -29,11 +29,12 @@ struct MainView: View {
                         ForEach(viewModel.todoItems.freeze()) { item in
                             if !isEditing {     // アイテム選択可能状態でない時
                                 NavigationLink {
-                                    EditView(id: item.id, title: item.title, dueDate: item.dueDate, note: item.note)        // 詳細・編集画面へ遷移
+                                    EditView(id: item.id, title: item.title, dueDate: item.dueDate, note: item.note, category: item.category)        // 詳細・編集画面へ遷移
                                         .environmentObject(ViewModel())
                                 } label: {
                                     Text(item.title)      // ラベルとして，タイトルのみ表示しておく
                                 }
+                                
                             } else {            // アイテム選択可能状態である時
                                 HStack {
                                     Text(item.title)
@@ -64,11 +65,6 @@ struct MainView: View {
                             }
                         }   // ForEach
                     }   // List
-                    .onTapGesture {
-                        if categoryView {
-                            categoryView = false
-                        }
-                    }
                     .navigationTitle(categoryView ? "フォルダ" : "TODOリスト")
                     .navigationBarTitleDisplayMode(.large)
                     .offset(x: (categoryView && !isEditing) ? xOffset : 0)
@@ -79,12 +75,6 @@ struct MainView: View {
                                 let offset = value.translation.width
                                 if offset > 0, !isEditing {
                                     categoryView = true
-                                }
-                            }
-                            .onEnded { value in
-                                let offset = value.translation.width
-                                if offset < xOffset / 2, !isEditing {
-                                    categoryView = false
                                 }
                             }
                     )
@@ -104,7 +94,7 @@ struct MainView: View {
                                     isEditing.toggle()
                                 }
                             }
-                            .disabled((isEditing && selectedItemID.isEmpty) || viewModel.todoItems.isEmpty)
+                            .disabled(categoryView || (isEditing && selectedItemID.isEmpty) || viewModel.todoItems.isEmpty)
                         }
                         if isEditing {
                             ToolbarItem(placement: .navigationBarLeading) {
@@ -119,6 +109,25 @@ struct MainView: View {
                         }
                     }   // .toolbar
                     
+                    // カバービュー
+                    if categoryView {
+                        CoverView(categoryView: $categoryView)
+                            .offset(x: categoryView ? xOffset : 0)
+                            .animation(.easeInOut(duration: 0.3), value: (categoryView && !isEditing))
+                            .onTapGesture {
+                                categoryView = false
+                            }
+                            .gesture(
+                                DragGesture()
+                                    .onEnded { value in
+                                        let offset = value.translation.width
+                                        if offset < xOffset / 2, !isEditing {
+                                            categoryView = false
+                                        }
+                                    }
+                            )
+                    }
+
                     // 新規作成ボタン
                     VStack {
                         Spacer()
@@ -133,6 +142,7 @@ struct MainView: View {
                             }
                         }
                     }
+
                 }   // ZStack
             }   // NavigationStack
             // モーダル遷移で新規作成画面へ
@@ -143,6 +153,24 @@ struct MainView: View {
         }   // GeometryReader
     }   // body
 }   // MainView
+
+// カバービュー
+struct CoverView: View {
+    @Environment(\.colorScheme) var colorScheme
+    @Binding var categoryView: Bool
+    var body: some View {
+        if colorScheme == .light {
+            Color.white
+                .opacity(0.1)
+                .ignoresSafeArea(.all)
+        } else {
+            Color.black
+                .opacity(0.1)
+                .ignoresSafeArea(.all)
+        }
+
+    }
+}
 
 // 新規作成ボタン
 struct CreateButton: View {
@@ -171,7 +199,9 @@ struct CategoryButton: View {
     @Binding var categoryView: Bool
     var body: some View {
         Button(action: {
-            categoryView.toggle()
+            withAnimation {
+                categoryView.toggle()
+            }
         }, label: {
             Image(systemName: "folder.fill")
                 .padding()

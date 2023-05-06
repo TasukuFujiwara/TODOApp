@@ -58,12 +58,13 @@ class ViewModel: ObservableObject {
     }
     
     // データベースへアイテム追加依頼
-    func addItem(title: String, dueDate: Date, note: String) {
+    func addItem(title: String, dueDate: Date, note: String, category: String) {
         let newItem = TODOItem()
         newItem.id = UUID()
         newItem.title = title
         newItem.dueDate = dueDate
         newItem.note = note
+        newItem.category = category
         model.addItem(newItem)
     }
     
@@ -74,8 +75,8 @@ class ViewModel: ObservableObject {
     }
     
     // データベース中の特定のアイテムデータを編集依頼
-    func editItem(id: TODOItem.ID, title: String, dueDate: Date, note: String) {
+    func editItem(id: TODOItem.ID, title: String, dueDate: Date, note: String, category: String) {
         guard let _ = model.itemFromID(id) else { fatalError("id: \(id) not exists") }
-        model.editItem(id: id, title: title, dueDate: dueDate, note: note)
+        model.editItem(id: id, title: title, dueDate: dueDate, note: note, category: category)
     }
 }

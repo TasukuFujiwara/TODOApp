@@ -17,6 +17,7 @@ struct EditView: View {
     @State var title: String
     @State var dueDate: Date
     @State var note: String
+    @State var category: String
     @State fileprivate var isEditing: Bool = false      // 編集可能かどうか
 
     // 編集キャンセルの際に，修正前のデータに戻すために一時的に格納しておく変数
@@ -31,26 +32,32 @@ struct EditView: View {
         return formatter
     }()
 
+    let sampleCategories = ["なし", "仕事", "プライベート", "重要"]
+
     var body: some View {
         NavigationStack {
-            List {
+            Form {
+                TextField("タイトル", text: $title)
                 if !isEditing {     // 詳細モード
-                    Text(title)
                     HStack {
                         Text("期日")
                         Spacer()
                         Text("\(Self.dateFormatter.string(from: dueDate))")
                     }
-                    Text(note)
-                        .frame(height: 200)
                 } else {            // 編集モード
-                    TextField("タイトル", text: $title)
                     DatePicker("期日", selection: $dueDate)
                         .datePickerStyle(.compact)
-                    TextField("メモ", text: $note, axis: .vertical)
-                        .frame(height: 200)
                 }
+                Picker("フォルダ", selection: $category) {
+                    ForEach(sampleCategories, id: \.self) { key in
+                        Text(key)
+                    }
+                }
+                
+                TextField("メモ", text: $note, axis: .vertical)
+                    .frame(height: 200)
             }
+            .disabled(!isEditing)   // 詳細モードなら，編集不可にする
             .navigationTitle(isEditing ? "編集" : "詳細")
             .navigationBarBackButtonHidden(true)
             // ツールバー
@@ -67,7 +74,7 @@ struct EditView: View {
                             }
                         } else {        // 編集モード
                             Button("適用") {      // 編集内容を保存し，遷移元に戻る
-                                viewModel.editItem(id: id, title: title, dueDate: dueDate, note: note)
+                                viewModel.editItem(id: id, title: title, dueDate: dueDate, note: note, category: category)
                                 dismiss()
                             }
                         }
@@ -87,11 +94,11 @@ struct EditView: View {
                             }
                         }
                     }
-                }
-            }
-        }
-    }
-}
+                }   // if isPresented
+            }   // toolbar
+        }   // NavigationStack
+    }   // body
+}   // EditView
 
 struct EditView_Previews: PreviewProvider {
     static var previews: some View {
@@ -99,7 +106,8 @@ struct EditView_Previews: PreviewProvider {
         let title = ""
         let dueDate = Date()
         let note = ""
-        EditView(id: id, title: title, dueDate: dueDate, note: note)
+        let category = ""
+        EditView(id: id, title: title, dueDate: dueDate, note: note, category: category)
             .environmentObject(ViewModel())
     }
 }
