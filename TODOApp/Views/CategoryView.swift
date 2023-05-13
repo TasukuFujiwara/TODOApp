@@ -14,6 +14,8 @@ struct CategoryView: View {
     @Binding var nowCategory: String
     @Binding var categoryView: Bool
     
+    let categoryList = ["仕事", "重要"]
+    
     var body: some View {
         let textColor: Color = colorScheme == .light ? .black : .white
         NavigationStack {
@@ -25,7 +27,7 @@ struct CategoryView: View {
                         categoryView = false
                     }
                     .padding()
-                    ForEach(Array(viewModel.categoryList), id: \.self) { key in
+                    ForEach(categoryList, id: \.self) { key in
                         
                         Button(key) {
                             nowCategory = key
