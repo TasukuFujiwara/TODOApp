@@ -25,13 +25,10 @@ struct MainView: View {
                 ZStack {
                     CategoryView(nowCategory: $nowCategory, categoryView: $categoryView)
                         .environmentObject(ViewModel())
-                        //.frame(width: xOffset)
-                        //.animation(.easeInOut(duration: 0.5), value: categoryView)
                     
                     List {
-//                        let array: [TODOItem] = nowCategory == "なし" ? Array(viewModel.todoItems) : viewModel.itemDict[nowCategory]!
-                        let array = Array(viewModel.todoItems)
-                        ForEach(array, id: \.self) { item in
+//                        let array = Array(viewModel.todoItems)
+                        ForEach(viewModel.todoItems, id: \.id) { item in
                             if !isEditing {     // アイテム選択可能状態でない時
                                 NavigationLink {
                                     EditView(id: item.id, title: item.title, dueDate: item.dueDate, note: item.note, category: item.category)        // 詳細・編集画面へ遷移
@@ -59,13 +56,13 @@ struct MainView: View {
                                 }
                                 .contentShape(Rectangle())
                                 .onTapGesture {         // アイテムをタップした時
-                                    withAnimation {
+//                                    withAnimation {
                                         if selectedItemID.contains(item.id) {       // アイテムが選択されていれば，チェックを外す
                                             selectedItemID.remove(item.id)
                                         } else {        // アイテムが選択されていなければ，チェックをつける
                                             selectedItemID.insert(item.id)
                                         }
-                                    }
+//                                    }
                                 }
                             }
                         }   // ForEach
@@ -89,11 +86,13 @@ struct MainView: View {
                             Button(isEditing ? "削除" : "選択") {  // アイテムが1つ以上選択されていれば，押せる状態に
                                 if isEditing {
                                     for id in selectedItemID {      // 選択したアイテムを削除
-                                        viewModel.deleteItem(id)
+                                        if let _ = viewModel.model.itemFromID(id) {
+                                            viewModel.deleteItem(id)
+                                        }
                                         selectedItemID.remove(id)
-                                    }
-                                    if viewModel.todoItems.isEmpty {     // TODOアイテムがなくなったら，選択可能状態を終了
-                                        isEditing = false
+                                        if viewModel.todoItems.isEmpty {     // TODOアイテムがなくなったら，選択可能状態を終了
+                                            isEditing = false
+                                        }
                                     }
                                 } else {
                                     isEditing.toggle()
@@ -151,7 +150,7 @@ struct MainView: View {
                 }   // ZStack
             }   // NavigationStack
             // モーダル遷移で新規作成画面へ
-            .sheet(isPresented: $createView) {
+            .fullScreenCover(isPresented: $createView) {
                 CreateView()
                     .environmentObject(ViewModel())
             }
@@ -173,7 +172,6 @@ struct CoverView: View {
                 .opacity(0.1)
                 .ignoresSafeArea(.all)
         }
-
     }
 }
 
