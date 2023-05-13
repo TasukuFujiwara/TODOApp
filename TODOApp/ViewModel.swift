@@ -12,12 +12,14 @@ import RealmSwift
 // ViewModel: ビューとDBのインタフェースとなるモデル
 class ViewModel: ObservableObject {
     @Published var model: DBModel = DBModel()           // データベースモデル呼び出し
-    private var token: NotificationToken?               // データベースの変化を取得するトークン
+    private var tokenTODO: NotificationToken?               // データベースの変化を取得するトークン
+    private var tokenCategory: NotificationToken?
     @Published var itemList: [TODOItem] = []            // TODOアイテムを格納しているリスト
+    @Published var categoryList = List<String>()
     
     init() {
         // データベースの変化を検知
-        token = model.items.observe { [weak self] (changes: RealmCollectionChange) in
+        tokenTODO = model.items.observe { [weak self] (changes: RealmCollectionChange) in
             switch changes {
             case .initial:
                 self?.itemList = self?.todoItems.map{ $0 } ?? []
@@ -43,17 +45,42 @@ class ViewModel: ObservableObject {
             case .error(_):
                 fatalError("error")
             }   // switch
-        }   // token
+        }   // tokenTODO
+        
+//        tokenCategory = model.categories.observe { [weak self] ( changes: RealmCollectionChange) in
+//            switch changes {
+//            case .initial:
+//                self?.categoryList = self?.categories ?? List<String>()
+//            case .update(let record, deletions: let deletion, insertions: let insertion, modifications: _):
+//                if deletion != [] {
+//                    for index in deletion {
+//                        self?.categoryList.remove(at: index)
+//                    }
+//                }
+//                if insertion != [] {
+//                    for index in insertion {
+//                        self?.categoryList.append(record[index])
+//                    }
+//                }
+//            case .error(_):
+//                fatalError("error in Category Token")
+//            }   // switch
+//        }   // tokenCategory
+        
     }   // init
     
     // デイニシャライザ
     deinit {
-        token?.invalidate()
+        tokenTODO?.invalidate()
     }
     
     // TODOアイテムを格納している．期日の近い順にソート
     var todoItems: Results<TODOItem> {
         model.items.sorted(by: \.dueDate)
+    }
+    
+    var categories: List<String> {
+        model.categories
     }
     
     // データベースへアイテム追加依頼
@@ -77,5 +104,13 @@ class ViewModel: ObservableObject {
     func editItem(id: TODOItem.ID, title: String, dueDate: Date, note: String, category: String) {
         guard let _ = model.itemFromID(id) else { fatalError("id: \(id) not exists") }
         model.editItem(id: id, title: title, dueDate: dueDate, note: note, category: category)
+    }
+    
+    func addCategory(_ category: String) {
+        model.addCategory(category)
+    }
+    
+    func deleteCategory(_ category: String) {
+        model.deleteCategory(category)
     }
 }
