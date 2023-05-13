@@ -16,6 +16,7 @@ class ViewModel: ObservableObject {
     private var tokenCategory: NotificationToken?
     @Published var itemList: [TODOItem] = []            // TODOアイテムを格納しているリスト
     @Published var categoryList = List<String>()
+    @Published var itemDict: [String:[TODOItem]] = [:]
     
     init() {
         // データベースの変化を検知
@@ -66,6 +67,8 @@ class ViewModel: ObservableObject {
 //                fatalError("error in Category Token")
 //            }   // switch
 //        }   // tokenCategory
+        
+        self.itemDict = Dictionary(grouping: todoItems, by: { $0.category })
         
     }   // init
     
