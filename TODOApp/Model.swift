@@ -14,7 +14,7 @@ class DBModel: ObservableObject {
     
     init() {
         config = Realm.Configuration(
-            schemaVersion: 9
+            schemaVersion: 11
         )          // モデル定義を変更したら，schemaVersionの値を増やさないといけない
     }
     
