@@ -49,7 +49,8 @@ struct EditView: View {
                         .datePickerStyle(.compact)
                 }
                 Picker("フォルダ", selection: $category) {
-                    ForEach(sampleCategories, id: \.self) { key in
+                    let categories = ["なし"] + viewModel.categories
+                    ForEach(categories, id: \.self) { key in
                         Text(key).tag(key)
                     }
                 }

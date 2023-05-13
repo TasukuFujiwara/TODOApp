@@ -28,7 +28,7 @@ struct CategoryView: View {
                     Color.blue
                     VStack {
                         Button("全てのTODO") {
-                            nowCategory = "なし"
+                            nowCategory = "全てのTODO"
                             categoryView = false
                         }
                         .padding()
@@ -55,6 +55,7 @@ struct CategoryView: View {
             }   // NavigationStack
             .fullScreenCover(isPresented: $createNewFolder) {
                 CreateNewFolderView(createNewFolder: $createNewFolder)
+                    .environmentObject(ViewModel())
             }
         }   // GeometryReader
     }   // body
@@ -64,7 +65,10 @@ struct CreateNewFolderView: View {
     @Environment(\.isPresented) var isPresented
     @Environment(\.dismiss) var dismiss
     
+    @EnvironmentObject var viewModel: ViewModel
+    
     @State private var newFolderName = ""
+    @State private var displayError = false
     
     @Binding var createNewFolder: Bool
 
@@ -82,13 +86,25 @@ struct CreateNewFolderView: View {
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button("追加") {
+                            if !viewModel.categories.contains(newFolderName) {
                             // カテゴリーリストに追加
-                            // 既に同名のフォルダが存在する場合，追加せずにエラーメッセージを出す
-                            dismiss()
+                                if displayError {
+                                    displayError = false
+                                }
+                                //viewModel.addCategory(newFolderName)
+                                dismiss()
+                            } else {
+                             // 既に同名のフォルダが存在する場合，追加せずにエラーメッセージを出す
+                                displayError = true
+                            }
                         }
                     }
                 }   // if isPresented
             }   // toolbar
+            if displayError {
+                Text("Folder name: \(newFolderName) already exists")
+                    .foregroundColor(.red)
+            }
         }   // NavigationStack
     }
 }

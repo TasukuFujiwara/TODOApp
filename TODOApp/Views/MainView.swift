@@ -16,7 +16,7 @@ struct MainView: View {
     @State private var categoryView: Bool = false
     @State private var selectedItemID: Set<UUID> = []       // 選択したTODOアイテムを格納する
     @State fileprivate var isEditing: Bool = false          // アイテムを選択できる状態かどうか
-    @State var nowCategory: String = "なし"
+    @State var nowCategory: String = "全てのTODO"
     
     var body: some View {
         GeometryReader { geometry in
@@ -67,7 +67,7 @@ struct MainView: View {
                             }
                         }   // ForEach
                     }   // List
-                    .navigationTitle(categoryView ? "フォルダ" : (nowCategory == "なし" ? "全てのTODO" : nowCategory))
+                    .navigationTitle(categoryView ? "フォルダ" : nowCategory)
                     .navigationBarTitleDisplayMode(.large)
                     .offset(x: (categoryView && !isEditing) ? xOffset : 0)
                     .animation(.easeInOut(duration: 0.3), value: (categoryView && !isEditing))
