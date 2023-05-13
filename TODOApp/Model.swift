@@ -14,8 +14,8 @@ class DBModel: ObservableObject {
     
     init() {
         config = Realm.Configuration(
-            schemaVersion: 11
-        )          // モデル定義を変更したら，schemaVersionの値を増やさないといけない
+            schemaVersion: 11           // モデル定義を変更したら，schemaVersionの値を増やさないといけない
+        )
     }
     
     var realm: Realm {
@@ -60,6 +60,29 @@ class DBModel: ObservableObject {
             item.category = category
         }
     }
+    
+    var categories: List<String> {
+        realm.objects(Category.self).first?.list ?? List<String>()
+    }
+    
+    func addCategory(_ category: String) {
+        self.objectWillChange.send()
+        try! realm.write {
+            let newCategories = Category()
+            newCategories.list.append(category)
+            realm.add(newCategories, update: .modified)
+        }
+    }
+    
+    func deleteCategory(_ category: String) {
+        self.objectWillChange.send()
+        try! realm.write {
+            if let index = categories.firstIndex(where: { $0 == category }) {
+                categories.remove(at: index)
+            }
+        }
+    }
+    
 }
 
 // TODOItem: TODOを管理するクラス
@@ -69,4 +92,8 @@ class TODOItem: Object, Identifiable {
     @Persisted var dueDate: Date                                // 期日
     @Persisted var note: String                                 // メモ
     @Persisted var category: String                             // カテゴリー
+}
+
+class Category: Object {
+    @Persisted var list = List<String>()
 }
