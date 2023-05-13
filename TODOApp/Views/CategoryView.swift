@@ -13,6 +13,7 @@ struct CategoryView: View {
     @EnvironmentObject var viewModel: ViewModel
     
     @State var createNewFolder: Bool = false
+    @State var selection: Set<String> = []
     
     @Binding var nowCategory: String
     @Binding var categoryView: Bool
@@ -27,29 +28,34 @@ struct CategoryView: View {
                 ZStack(alignment: .leading) {
                     Color.blue
                     VStack {
-                        Button("全てのTODO") {
-                            nowCategory = "全てのTODO"
-                            categoryView = false
-                        }
-                        .padding()
-                        ForEach(viewModel.categories, id: \.self) { key in
-                            
-                            Button(key) {
-                                nowCategory = key
+                        Text("全てのTODO")
+                            .padding()
+                            .onTapGesture {
+                                nowCategory = "全てのTODO"
                                 categoryView = false
                             }
-                            .padding()
-
+                        ForEach(viewModel.categories, id: \.self) { key in
+                            Text(key)
+                                .onTapGesture {
+                                    nowCategory = key
+                                    categoryView = false
+                                }
+                                .contextMenu {
+                                    Button(action: {
+                                        viewModel.deleteCategory(key)
+                                    }, label: {
+                                        Text("削除")
+                                            .foregroundColor(.red)
+                                    })
+                                }
+                                .padding()
                         }
-                        
                         Button("+ 新規フォルダ") {
-                            createNewFolder.toggle()
+                            createNewFolder = true
                         }
                         .padding()
-                            
-                    }
-
-                }
+                    }   // VStack
+                }   // ZStack
                 .edgesIgnoringSafeArea(.all)
                 .foregroundColor(textColor)
             }   // NavigationStack
@@ -91,7 +97,7 @@ struct CreateNewFolderView: View {
                                 if displayError {
                                     displayError = false
                                 }
-                                //viewModel.addCategory(newFolderName)
+                                viewModel.addCategory(newFolderName)
                                 dismiss()
                             } else {
                              // 既に同名のフォルダが存在する場合，追加せずにエラーメッセージを出す
