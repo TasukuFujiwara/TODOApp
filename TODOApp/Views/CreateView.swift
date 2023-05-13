@@ -17,7 +17,7 @@ struct CreateView: View {
     @Environment(\.dismiss) var dismiss                 // 遷移元に戻る
     @Environment(\.isPresented) var isPresented         // 他の画面から遷移してきたかどうか
     
-    let sampleCategories = ["なし", "仕事", "プライベート", "重要"]
+    let sampleCategories = ["なし", "仕事", "重要"]
     
     var body: some View {
         NavigationStack {
@@ -28,7 +28,7 @@ struct CreateView: View {
                     .datePickerStyle(.compact)
                 Picker("フォルダ", selection: $category) {
                     ForEach(sampleCategories, id: \.self) { key in
-                        Text(key)
+                        Text(key).tag(key)
                     }
                 }
                 TextField("メモ", text: $note)

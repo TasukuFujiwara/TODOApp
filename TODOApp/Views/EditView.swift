@@ -32,7 +32,7 @@ struct EditView: View {
         return formatter
     }()
 
-    let sampleCategories = ["なし", "仕事", "プライベート", "重要"]
+    let sampleCategories = ["なし", "仕事", "重要"]
 
     var body: some View {
         NavigationStack {
@@ -50,7 +50,7 @@ struct EditView: View {
                 }
                 Picker("フォルダ", selection: $category) {
                     ForEach(sampleCategories, id: \.self) { key in
-                        Text(key)
+                        Text(key).tag(key)
                     }
                 }
                 
@@ -106,7 +106,7 @@ struct EditView_Previews: PreviewProvider {
         let title = ""
         let dueDate = Date()
         let note = ""
-        let category = ""
+        let category = "なし"
         EditView(id: id, title: title, dueDate: dueDate, note: note, category: category)
             .environmentObject(ViewModel())
     }
