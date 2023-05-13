@@ -14,8 +14,6 @@ class ViewModel: ObservableObject {
     @Published var model: DBModel = DBModel()           // データベースモデル呼び出し
     private var token: NotificationToken?               // データベースの変化を取得するトークン
     @Published var itemList: [TODOItem] = []            // TODOアイテムを格納しているリスト
-    @Published var categoryList: [String] = ["仕事", "プライベート", "重要"]
-    @Published var itemDict: [String:[TODOItem]] = [:]  // TODOアイテムをカテゴリーごとに分けて格納している辞書
     
     init() {
         // データベースの変化を検知
@@ -23,59 +21,23 @@ class ViewModel: ObservableObject {
             switch changes {
             case .initial:
                 self?.itemList = self?.todoItems.map{ $0 } ?? []
-//                if let keys = self?.itemDict.keys {
-//                    for category in keys {
-//                        if self?.categoryList.contains(category) != nil {
-//                            self?.categoryList.append(category)
-//                        }
-//                    }
-//                }
-//                if let todoItems = self?.todoItems {
-//                    for todoItem in todoItems {
-//                        let key = todoItem.category
-//                        self?.itemDict[key]!.append(todoItem)
-//                    }
-//                } else { self?.itemDict = [:] }
             case .update(let record, deletions: let deletion, insertions: let insertion, modifications: let modification):
                 // 消去
                 if deletion != [] {
                     for index in deletion {
                         self?.itemList.remove(at: index)
-                        let deleteItem = record[index]
-                        //self?.itemDict[deleteItem.category]!.removeAll(where: { $0.id == deleteItem.id })
                     }
                 }
                 // 追加
                 if insertion != [] {
                     for index in insertion {
-                        let appendItem = record[index]
-//                        if var categoryList = self?.categoryList {
-//                            if !categoryList.contains(appendItem.category) {
-//                                categoryList.insert(appendItem.category)
-//                            }
-//                        }
-                        self?.itemList.append(appendItem)
-                        //self?.itemDict[appendItem.category]!.append(record[index])
+                        self?.itemList.append(record[index])
                     }
                 }
                 // 編集
                 if modification != [] {
                     for index in modification {
-                        let editedItem = record[index]      // 編集後アイテムを取得
-//                        if let oldEditedItem = self?.itemList[index] {      // 編集前アイテムを取得
-//                            if editedItem.category != oldEditedItem.category {      // 編集前と編集後でカテゴリーが変わっている場合
-//                                self?.itemDict[oldEditedItem.category]!.removeAll(where: { $0.id == editedItem.id})     // 編集前のカテゴリーをキーとする配列から該当要素を削除
-//                                self?.itemDict[editedItem.category]!.append(editedItem)     // 新しいカテゴリーをキーとする配列に編集後アイテムを格納
-//                            } else {        // 編集前とカテゴリーが同じ場合
-//                                // 辞書中の該当するカテゴリーをキーとする配列から編集前データを取り出し，編集後データで書き換え
-//                                if var list = self?.itemDict[oldEditedItem.category] {
-//                                    if let oldEditedItemIndex = list.firstIndex(where: {$0.id == oldEditedItem.id}) {
-//                                        list[oldEditedItemIndex] = editedItem
-//                                    }
-//                                }
-//                            }
-//                        }
-                        self?.itemList[index] = editedItem
+                        self?.itemList[index] = record[index]
                     }
                 }   // if modification != []
             case .error(_):
