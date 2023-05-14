@@ -8,11 +8,13 @@
 import SwiftUI
 import RealmSwift
 
+// エラーの列挙
 enum Error: LocalizedError {
-    case none
-    case nameIsEmpty
-    case folderAlreadyExists
+    case none                   // エラーなし
+    case nameIsEmpty            // 名前が空
+    case folderAlreadyExists    // 同名のフォルダが既に存在
     
+    // エラーメッセージ
     var errorDescription: String? {
         switch self {
         case .none:
@@ -20,7 +22,7 @@ enum Error: LocalizedError {
         case .nameIsEmpty:
             return "新しいフォルダ名を入力してください"
         case .folderAlreadyExists:
-            return "そのフォルダ名は既に作成済みです"
+            return "その名前のフォルダは既に作成済みです"
         }
     }
 }
@@ -34,7 +36,8 @@ struct CreateView: View {
     @State private var category: String = "なし"
     @State private var tmpCategory: String = ""
     
-    @State fileprivate var displayError: Error = .none
+    @State fileprivate var showAlert: Bool = false      // アラートを表示するかどうか
+    @State fileprivate var displayError: Error = .none  // エラー
     
     @Environment(\.dismiss) var dismiss                 // 遷移元に戻る
     @Environment(\.isPresented) var isPresented         // 他の画面から遷移してきたかどうか
@@ -54,14 +57,32 @@ struct CreateView: View {
                         Text(key).tag(key)
                     }
                 }
-                .onAppear {
+                .onAppear {     // デフォルトの選択
                     category = nowCategory == "全てのTODO" ? "なし" : nowCategory
                 }
-                
-                if category == "+ 新規フォルダ" {
-                    TextField("新規フォルダ名", text: $tmpCategory)
+                .onChange(of: category) { newValue in
+                    if newValue == "+ 新規フォルダ" {     // これが選択されたら，アラート表示
+                        showAlert = true
+                    }
                 }
-                
+                .alert("新規フォルダ作成", isPresented: $showAlert, actions: {      // アラート
+                    TextField("新規フォルダ名", text: $tmpCategory)
+                    Button("キャンセル") {
+                        category = "なし"
+                    }
+                    Button("作成") {
+                        if tmpCategory == "" {          // フォルダ名が空
+                            displayError = .nameIsEmpty
+                            category = "なし"
+                        } else if viewModel.categorySet.contains(tmpCategory) {         // 同名のフォルダが既に存在
+                            displayError = .folderAlreadyExists
+                            category = tmpCategory
+                        } else {            // 正常処理
+                            viewModel.categorySet.append(tmpCategory)
+                            category = tmpCategory
+                        }
+                    }
+                })
                 TextField("メモ", text: $note)
                     .frame(height: 200)
             }
@@ -78,12 +99,11 @@ struct CreateView: View {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         // データをデータベースに追加．遷移元に戻る
                         Button("追加") {
-                            if category == "+ 新規フォルダ" && tmpCategory == "" {
-                                //displayError = true
+                            if category == "+ 新規フォルダ" && tmpCategory == "" {        // 新規フォルダ名が空
                                 displayError = .nameIsEmpty
-                            } else if category == "+ 新規フォルダ" && viewModel.categorySet.contains(tmpCategory) {
+                            } else if category == "+ 新規フォルダ" && viewModel.categorySet.contains(tmpCategory) {       // 同名のフォルダが既に存在
                                 displayError = .folderAlreadyExists
-                            } else {
+                            } else {        // 正常処理
                                 viewModel.addItem(
                                     title: title == "" ? "New Title" : title,
                                     dueDate: dueDate,
@@ -97,6 +117,7 @@ struct CreateView: View {
                 }   // if isPresented
             }   // toolbar
 
+            // エラーメッセージ
             if let errorMessage = displayError.errorDescription {
                 Text(errorMessage)
                     .foregroundColor(.red)

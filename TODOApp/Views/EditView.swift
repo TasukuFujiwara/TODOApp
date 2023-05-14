@@ -21,8 +21,10 @@ struct EditView: View {
     @State var category: String
     @State fileprivate var isEditing: Bool = false      // 編集可能かどうか
     
+    @State fileprivate var showAlert: Bool = false      // アラートを表示するかどうか
+    
     @State var tmpCategory: String = ""
-    @State fileprivate var displayError: Error = .none
+    @State fileprivate var displayError: Error = .none  // エラータイプ．デフォルトはエラーなし
 
     // 編集キャンセルの際に，修正前のデータに戻すために一時的に格納しておく変数
     static var tmpTitle: String! = nil
@@ -58,11 +60,29 @@ struct EditView: View {
                         Text(key).tag(key)
                     }
                 }
-                
-                if category == "+ 新規フォルダ" {
-                    TextField("新規フォルダ名", text: $tmpCategory)
+                .onChange(of: category) { newValue in
+                    if newValue == "+ 新規フォルダ" {         // これを選択したらアラート表示
+                        showAlert = true
+                    }
                 }
-                    
+                .alert("新規フォルダ作成", isPresented: $showAlert, actions: {      // アラート
+                    TextField("新規フォルダ名", text: $tmpCategory)
+                    Button("キャンセル") {
+                        category = "なし"
+                    }
+                    Button("作成") {
+                        if tmpCategory == "" {          // フォルダ名が空
+                            displayError = .nameIsEmpty
+                            category = "なし"
+                        } else if viewModel.categorySet.contains(tmpCategory) {     // 同名のフォルダが既に存在
+                            displayError = .folderAlreadyExists
+                            category = tmpCategory
+                        } else {            // 正常処理
+                            viewModel.categorySet.append(tmpCategory)
+                            category = tmpCategory
+                        }
+                    }
+                })
                 TextField("メモ", text: $note, axis: .vertical)
                     .frame(height: 200)
             }
