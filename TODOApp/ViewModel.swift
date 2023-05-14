@@ -7,6 +7,7 @@
 
 import Foundation
 import RealmSwift
+import OrderedCollections
 
 
 // ViewModel: ビューとDBのインタフェースとなるモデル
@@ -15,7 +16,7 @@ class ViewModel: ObservableObject {
     private var tokenTODO: NotificationToken?               // データベースの変化を取得するトークン
     private var tokenCategory: NotificationToken?
     @Published var itemList: [TODOItem] = []            // TODOアイテムを格納しているリスト
-    @Published var categoryList = List<String>()
+    @Published var categorySet: OrderedSet<String> = []
     @Published var itemDict: [String:[TODOItem]] = [:]
     
     init() {
@@ -23,53 +24,41 @@ class ViewModel: ObservableObject {
         tokenTODO = model.items.observe { [weak self] (changes: RealmCollectionChange) in
             switch changes {
             case .initial:
-                self?.itemList = self?.todoItems.map{ $0 } ?? []
+                self?.itemList = self?.todoItems.map({$0}) ?? []
+                self?.itemDict = Dictionary(grouping: self?.todoItems.map({$0}) ?? [], by: { $0.category })
+                self?.categorySet = OrderedSet(self?.todoItems.map{ $0.category }.filter({ $0 != "なし"}) ?? [])
+                
             case .update(let record, deletions: let deletion, insertions: let insertion, modifications: let modification):
                 // 消去
                 if deletion != [] {
                     for index in deletion {
                         self?.itemList.remove(at: index)
                     }
+                    self?.itemDict = Dictionary(grouping: self?.todoItems.map({$0}) ?? [], by: { $0.category })
+                    self?.categorySet = OrderedSet(self?.todoItems.map{ $0.category }.filter({ $0 != "なし"}) ?? [])
                 }
                 // 追加
                 if insertion != [] {
                     for index in insertion {
                         self?.itemList.append(record[index])
+                        self?.itemDict[record[index].category]?.append(record[index])
+                        self?.categorySet.append(record[index].category)
                     }
+                    self?.itemDict = Dictionary(grouping: self?.todoItems.map({$0}) ?? [], by: { $0.category })
+                    self?.categorySet = OrderedSet(self?.todoItems.map{ $0.category }.filter({ $0 != "なし"}) ?? [])
                 }
                 // 編集
                 if modification != [] {
                     for index in modification {
                         self?.itemList[index] = record[index]
                     }
+                    self?.itemDict = Dictionary(grouping: self?.todoItems.map({$0}) ?? [], by: { $0.category })
+                    self?.categorySet = OrderedSet(self?.todoItems.map{ $0.category }.filter({ $0 != "なし"}) ?? [])
                 }   // if modification != []
             case .error(_):
                 fatalError("error")
             }   // switch
         }   // tokenTODO
-        
-//        tokenCategory = model.categories.observe { [weak self] ( changes: RealmCollectionChange) in
-//            switch changes {
-//            case .initial:
-//                self?.categoryList = self?.categories ?? List<String>()
-//            case .update(let record, deletions: let deletion, insertions: let insertion, modifications: _):
-//                if deletion != [] {
-//                    for index in deletion {
-//                        self?.categoryList.remove(at: index)
-//                    }
-//                }
-//                if insertion != [] {
-//                    for index in insertion {
-//                        self?.categoryList.append(record[index])
-//                    }
-//                }
-//            case .error(_):
-//                fatalError("error in Category Token")
-//            }   // switch
-//        }   // tokenCategory
-        
-        self.itemDict = Dictionary(grouping: todoItems, by: { $0.category })
-        
     }   // init
     
     // デイニシャライザ
@@ -81,11 +70,7 @@ class ViewModel: ObservableObject {
     var todoItems: Results<TODOItem> {
         model.items.sorted(by: \.dueDate)
     }
-    
-    var categories: List<String> {
-        model.categories
-    }
-    
+
     // データベースへアイテム追加依頼
     func addItem(title: String, dueDate: Date, note: String, category: String) {
         let newItem = TODOItem()
@@ -108,12 +93,5 @@ class ViewModel: ObservableObject {
         guard let _ = model.itemFromID(id) else { fatalError("id: \(id) not exists") }
         model.editItem(id: id, title: title, dueDate: dueDate, note: note, category: category)
     }
-    
-    func addCategory(_ category: String) {
-        model.addCategory(category)
-    }
-    
-    func deleteCategory(_ category: String) {
-        model.deleteCategory(category)
-    }
+
 }
