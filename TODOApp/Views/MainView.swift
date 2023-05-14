@@ -27,8 +27,7 @@ struct MainView: View {
                         .environmentObject(ViewModel())
                     
                     List {
-//                        let array = Array(viewModel.todoItems)
-                        ForEach(viewModel.todoItems, id: \.id) { item in
+                        ForEach(nowCategory == "全てのTODO" ? Array(viewModel.todoItems) : (viewModel.itemDict[nowCategory] ?? []), id: \.id) { item in
                             if !isEditing {     // アイテム選択可能状態でない時
                                 NavigationLink {
                                     EditView(id: item.id, title: item.title, dueDate: item.dueDate, note: item.note, category: item.category)        // 詳細・編集画面へ遷移
@@ -90,7 +89,10 @@ struct MainView: View {
                                             viewModel.deleteItem(id)
                                         }
                                         selectedItemID.remove(id)
-                                        if viewModel.todoItems.isEmpty {     // TODOアイテムがなくなったら，選択可能状態を終了
+                                        if viewModel.todoItems.isEmpty || viewModel.todoItems.filter({$0.category == nowCategory}).count == 0 {     // TODOアイテムがなくなったら，選択可能状態を終了
+                                            if nowCategory != "全てのTODO" {
+                                                nowCategory = "全てのTODO"
+                                            }
                                             isEditing = false
                                         }
                                     }
@@ -151,7 +153,7 @@ struct MainView: View {
             }   // NavigationStack
             // モーダル遷移で新規作成画面へ
             .fullScreenCover(isPresented: $createView) {
-                CreateView()
+                CreateView(nowCategory: $nowCategory)
                     .environmentObject(ViewModel())
             }
         }   // GeometryReader
