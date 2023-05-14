@@ -15,6 +15,7 @@
 		5B4AE89D29E9384E005C1FE8 /* CreateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4AE89C29E9384E005C1FE8 /* CreateView.swift */; };
 		5B4AE8A029E939A6005C1FE8 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4AE89F29E939A6005C1FE8 /* Model.swift */; };
 		5B4AE8A229E945BA005C1FE8 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4AE8A129E945BA005C1FE8 /* ViewModel.swift */; };
+		5BBD0F712A10A49000CF29EB /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = 5BBD0F702A10A49000CF29EB /* OrderedCollections */; };
 		5BC98A3629F4EF33009FDEF5 /* EditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BC98A3529F4EF33009FDEF5 /* EditView.swift */; };
 		5BDC2FAF2A0360D600929510 /* CategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BDC2FAE2A0360D600929510 /* CategoryView.swift */; };
 /* End PBXBuildFile section */
@@ -37,6 +38,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5BBD0F712A10A49000CF29EB /* OrderedCollections in Frameworks */,
 				5B4AE89B29E935FF005C1FE8 /* RealmSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -110,6 +112,7 @@
 			name = TODOApp;
 			packageProductDependencies = (
 				5B4AE89A29E935FF005C1FE8 /* RealmSwift */,
+				5BBD0F702A10A49000CF29EB /* OrderedCollections */,
 			);
 			productName = TODOApp;
 			productReference = 5B4AE88829E932F1005C1FE8 /* TODOApp.app */;
@@ -141,6 +144,7 @@
 			mainGroup = 5B4AE87F29E932F1005C1FE8;
 			packageReferences = (
 				5B4AE89929E935FF005C1FE8 /* XCRemoteSwiftPackageReference "realm-swift" */,
+				5BBD0F6F2A10A49000CF29EB /* XCRemoteSwiftPackageReference "swift-collections" */,
 			);
 			productRefGroup = 5B4AE88929E932F1005C1FE8 /* Products */;
 			projectDirPath = "";
@@ -385,6 +389,14 @@
 				kind = branch;
 			};
 		};
+		5BBD0F6F2A10A49000CF29EB /* XCRemoteSwiftPackageReference "swift-collections" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-collections.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -392,6 +404,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5B4AE89929E935FF005C1FE8 /* XCRemoteSwiftPackageReference "realm-swift" */;
 			productName = RealmSwift;
+		};
+		5BBD0F702A10A49000CF29EB /* OrderedCollections */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5BBD0F6F2A10A49000CF29EB /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = OrderedCollections;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
