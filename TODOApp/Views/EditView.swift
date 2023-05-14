@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import RealmSwift
 
 
 // 詳細・編集画面
@@ -19,6 +20,9 @@ struct EditView: View {
     @State var note: String
     @State var category: String
     @State fileprivate var isEditing: Bool = false      // 編集可能かどうか
+    
+    @State var tmpCategory: String = ""
+    @State fileprivate var displayError: Error = .none
 
     // 編集キャンセルの際に，修正前のデータに戻すために一時的に格納しておく変数
     static var tmpTitle: String! = nil
@@ -49,12 +53,16 @@ struct EditView: View {
                         .datePickerStyle(.compact)
                 }
                 Picker("フォルダ", selection: $category) {
-                    let categories = ["なし"] + viewModel.categories
+                    let categories = ["なし"] + viewModel.categorySet.elements + ["+ 新規フォルダ"]
                     ForEach(categories, id: \.self) { key in
                         Text(key).tag(key)
                     }
                 }
                 
+                if category == "+ 新規フォルダ" {
+                    TextField("新規フォルダ名", text: $tmpCategory)
+                }
+                    
                 TextField("メモ", text: $note, axis: .vertical)
                     .frame(height: 200)
             }
@@ -75,8 +83,19 @@ struct EditView: View {
                             }
                         } else {        // 編集モード
                             Button("適用") {      // 編集内容を保存し，遷移元に戻る
-                                viewModel.editItem(id: id, title: title, dueDate: dueDate, note: note, category: category)
-                                dismiss()
+                                if category == "+ 新規フォルダ" && tmpCategory == "" {
+                                    displayError = .nameIsEmpty
+                                } else if category == "+ 新規フォルダ" && viewModel.categorySet.contains(tmpCategory) {
+                                    displayError = .folderAlreadyExists
+                                } else {
+                                    viewModel.editItem(
+                                        id: id,
+                                        title: title,
+                                        dueDate: dueDate,
+                                        note: note,
+                                        category: category == "+ 新規フォルダ" ? tmpCategory : (category == "" ? "なし" : category))
+                                    dismiss()
+                                }
                             }
                         }
                     }
@@ -97,6 +116,12 @@ struct EditView: View {
                     }
                 }   // if isPresented
             }   // toolbar
+            
+            if let errorMessage = displayError.errorDescription {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+            }
+            
         }   // NavigationStack
     }   // body
 }   // EditView
